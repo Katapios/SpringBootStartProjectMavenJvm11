@@ -50,11 +50,20 @@
                 <span th:text="${ingredient.name}">INGREDIENT</span><br/>
             </div>
         </div>
+        <span class="validationError"
+              th:if="${#fields.hasErrors('ingredients')}"
+              th:errors="*{ingredients}">no ingredients error</span>
     </div>
-    <div>
+    <div class="form-section">
         <h3>Name your taco creation:</h3>
-        <input type="text" th:field="*{name}"/>
-        <br/>
+        <div class="form-field">
+            <label for="name">Taco name</label>
+            <input id="name" type="text" th:field="*{name}"
+                   th:classappend="${#fields.hasErrors('name')} ? 'field-invalid' : ''"/>
+            <span class="validationError"
+                  th:if="${#fields.hasErrors('name')}"
+                  th:errors="*{name}">Name error</span>
+        </div>
         <button>Submit Your Taco</button>
     </div>
 </form>
