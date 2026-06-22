@@ -11,6 +11,12 @@ import com.katapios.tacos.TacoOrder;
 @RequestMapping("/orders")
 @SessionAttributes("tacoOrder")
 public class OrderController {
+
+    @ModelAttribute("tacoOrder")
+    public TacoOrder order() {
+        return new TacoOrder();
+    }
+
     @GetMapping("/current")
     public String orderForm() {
         return "orderForm";
