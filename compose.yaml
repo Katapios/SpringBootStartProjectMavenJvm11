@@ -1,0 +1,50 @@
+name: ${COMPOSE_PROJECT_NAME:-taco-cloud}
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-tacocloud}
+      POSTGRES_USER: ${POSTGRES_USER:-taco}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-taco_dev_password}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_BIND_ADDRESS:-127.0.0.1}:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-taco} -d ${POSTGRES_DB:-tacocloud}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - backend
+
+  pgadmin:
+    image: ${PGADMIN_IMAGE:-dpage/pgadmin4:8.14}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin_dev_password}
+    ports:
+      - "${PGADMIN_BIND_ADDRESS:-127.0.0.1}:${PGADMIN_PORT:-5050}:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - backend
+
+volumes:
+  postgres-data:
+    name: ${POSTGRES_VOLUME_NAME:-taco-cloud-postgres-data}
+  pgadmin-data:
+    name: ${PGADMIN_VOLUME_NAME:-taco-cloud-pgadmin-data}
+
+networks:
+  backend:
+    name: ${COMPOSE_PROJECT_NAME:-taco-cloud}-backend
