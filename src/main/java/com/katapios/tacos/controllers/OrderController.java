@@ -1,5 +1,6 @@
 package com.katapios.tacos.controllers;
 
+import com.katapios.tacos.repository.OrderRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,10 @@ import javax.validation.Valid;
 @RequestMapping("/orders")
 @SessionAttributes("tacoOrder")
 public class OrderController {
+    private OrderRepository orderRepository;
+    public OrderController(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
+    }
 
     @ModelAttribute("tacoOrder")
     public TacoOrder order() {
@@ -26,13 +31,12 @@ public class OrderController {
     }
 
     @PostMapping
-    public String processOrder(
-            @Valid TacoOrder order, Errors errors,
-            SessionStatus sessionStatus) {
+    public String processOrder(@Valid TacoOrder order, Errors errors,
+                               SessionStatus sessionStatus) {
         if (errors.hasErrors()) {
             return "orderForm";
         }
-        log.info("Order submitted: {}", order);
+        orderRepository.save(order);
         sessionStatus.setComplete();
         return "redirect:/";
     }
